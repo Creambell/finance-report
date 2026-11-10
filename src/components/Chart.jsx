@@ -1,0 +1,11 @@
+import React from 'react';
+import { money } from '../domain/finance.js';
+export default function Chart({ baseline, adjusted }) {
+  if (!baseline.length) return <div className="chart-empty"><span>⌁</span><b>나의 미래가 이곳에 그려집니다.</b><p>현재 나이와 소득을 입력해 주세요.</p></div>;
+  const values = [...baseline, ...adjusted].map(p => p.assets / 10000);
+  const min = Math.floor(Math.min(0, ...values)), max = Math.max(1, Math.ceil(Math.max(...values)));
+  const x = age => 55 + (age - baseline[0].age) / (100 - baseline[0].age) * 650;
+  const y = value => 280 - (value / 10000 - min) / (max - min) * 245;
+  const d = points => points.map((p, i) => `${i ? 'L' : 'M'}${x(p.age)},${y(p.assets)}`).join(' ');
+  return <div className="chart"><div className="chart-key"><span><i />현재 계획</span><span><i className="after" />조정한 계획</span><small>단위: 억원</small></div><svg viewBox="0 0 730 320" role="img" aria-label="100세까지 금융자산 추계 비교"><defs><linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1"><stop stopColor="#8baa74" stopOpacity=".18"/><stop offset="1" stopColor="#8baa74" stopOpacity="0"/></linearGradient></defs>{[0,1,2,3,4].map(i => { const v = min + (max-min)*i/4; return <g key={i}><line x1="55" x2="705" y1={y(v*10000)} y2={y(v*10000)} stroke="#e8eee3"/><text x="43" y={y(v*10000)+4} textAnchor="end">{v.toFixed(1)}</text></g>; })}{min < 0 && <g><rect x="55" width="650" y={y(0)} height={280-y(0)} fill="#fff4e2" opacity=".6"/><line x1="55" x2="705" y1={y(0)} y2={y(0)} stroke="#c6a976" strokeDasharray="4 4"/></g>}<path d={`${d(adjusted)} L705,${y(0)} L55,${y(0)} Z`} fill="url(#chartFill)"/><path d={d(baseline)} stroke="#b5c0ac" strokeWidth="2" fill="none" strokeDasharray="5 5"/><path d={d(adjusted)} stroke="#60814c" strokeWidth="3" fill="none"/>{adjusted.map(p => <circle key={p.age} cx={x(p.age)} cy={y(p.assets)} r="5" fill="transparent"><title>{p.age}세: {money(p.assets)}{p.events.length ? ` · ${p.events.join(', ')}` : ''}</title></circle>)}{[baseline[0].age,...Array.from({length:7},(_,i)=>40+i*10)].filter((a,i,all)=>a>=baseline[0].age && a<=100 && all.indexOf(a)===i && (i===0 || a-baseline[0].age>=5)).map(a=><text key={a} x={x(a)} y="307" textAnchor="middle">{a}세</text>)}</svg><p className="muted chart-caption">색이 칠해진 0원 아래 구간은 금융자산 부족을 뜻합니다. 점 위에 마우스를 올리면 연도별 금액이 표시됩니다.</p></div>;
+}

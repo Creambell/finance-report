@@ -1,0 +1,7 @@
+node_modules/
+.sites/
+*.log
+dist/
+.env
+.env.*
+LIFEPLAN-재무정보*.json
